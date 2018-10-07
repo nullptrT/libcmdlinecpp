@@ -1,0 +1,9 @@
+libdir=@CMDLINECPP_LIB_INSTALL_DIR@
+includedir=@CMDLINECPP_HEADER_INSTALL_DIR@
+
+Name: LibCmdLineC++
+Description: A simple parser for command line arguments with C++
+Version: @LIBCMDLINECPP_VERSION@
+Libs: ${libdir}/@CMDLINECPP_PKGCONFIG_LIBNAME@
+Cflags: -I${includedir}
+
