@@ -4,7 +4,7 @@
  * @author Sebastian Lau <lauseb644 [at] gmail [dot] com>
  **/
 /*
-    LibCmdLineArgumentsC++: A simple parser for command line arguments with C++
+    LibCmdLineArgumentsC++: A simple parser for command line option_names with C++
     Copyright (C) 2018 Sebastian Lau <lauseb644@gmail.com>
 
     This library is free software; you can redistribute it and/or
@@ -36,40 +36,80 @@ CmdLineParameters::CmdLineParameters()
 {}
 
 
-void CmdLineParameters::add_argument( const std::string argument ) {
-    std::string empty;
-    m_parameters.insert( std::make_pair(argument, empty) );
-}
-
-
-void CmdLineParameters::set( const std::string argument, const std::string parameter ) {
-    try {
-        m_parameters.at( argument ) = parameter;
-    } catch ( std::out_of_range& oor ) {
-        std::cerr << "Argument '" << argument << "' not found in parameter list." << std::endl;
-    }
-}
-
-
-const std::string CmdLineParameters::get( const std::string argument ) const {
-    try {
-        return m_parameters.at( argument );
-    } catch ( std::exception& e ) {
-        std::cerr << "Argument '" << argument << "' not found in parameter list." << std::endl;
+CmdLineParameters::CmdLineParameters( const CmdLineArguments* cl_args )
+    :   m_parameters()
+{
+    for ( unsigned int o = 0
+        ; o < cl_args->options_regular().size()
+        ; o++
+    ) {
+        Option option = cl_args->options_regular().at( o );
+        this->add_option_key( option.option() );
+        
+        if ( option.dataType() == Data::Type::Bool ) {
+            this->set( option.option(), FALSE );
+        }
     }
     
-    return std::string();
+    for ( unsigned int o = 0
+        ; o < cl_args->options_positional().size()
+        ; o++
+    ) {
+        Option option = cl_args->options_positional().at( o );
+        this->add_option_key( option.option() );
+    }
 }
 
 
-bool CmdLineParameters::has_argument( const std::string arguments ) const {
+
+void CmdLineParameters::add_option_key( const std::string option_name ) {
+    std::string empty;
+    m_parameters.insert( std::make_pair(option_name, empty) );
+}
+
+
+void CmdLineParameters::set( const std::string option_name, const std::string parameter ) {
     try {
-        m_parameters.at( arguments );
+        m_parameters.at( option_name ) = parameter;
+    } catch ( std::out_of_range& oor ) {
+        std::cerr << "Argument '" << option_name << "' not found in parameter list." << std::endl;
+    }
+}
+
+
+const std::string CmdLineParameters::get( const std::string option_name ) const {
+    try {
+        return m_parameters.at( option_name );
+    } catch ( std::exception& e ) {
+        std::cerr << "Argument '" << option_name << "' not found in parameter list." << std::endl;
+    }
+    
+    return std::string("");
+}
+
+
+bool CmdLineParameters::has_value( const std::string option_name ) const {
+    try {
+        if ( m_parameters.at( option_name ).length() > 0 ) {
+            return true;
+        }
+    } catch ( std::out_of_range& oor ) {
+        return false;
+    }
+    return false;
+}
+
+
+bool CmdLineParameters::is_specified( const std::string option_name ) const {
+    try {
+        m_parameters.at( option_name );
         return true;
     } catch ( std::out_of_range& oor ) {
         return false;
     }
+    return false;
 }
+
 
 
 const size_t CmdLineParameters::size() const {

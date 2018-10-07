@@ -32,10 +32,17 @@ namespace cmdlinecpp {
 namespace exceptions {
 
 
+/**
+ * @brief This exception is to be thrown if a data type is wrong
+ */
 class TypeError
     :   std::logic_error
 {
 public:
+    /**
+     * @brief Constructor
+     * @param what_arg A string that describes, what data type was expected
+     */
     TypeError( const std::string& what_arg );
 };
 

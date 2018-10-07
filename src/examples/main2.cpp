@@ -30,8 +30,8 @@ int main( int argc, char** argv ) {
 
     // Define the program
     cmdline.set_program_name( "cmdlinecpp_test2" );
-    cmdline.set_description( "A simple test with old-styled functions for LibCmdLineC++." );
-    cmdline.set_version( std::string(LIBCMDLINECPP_VERSION) );
+    cmdline.set_program_description( "A simple test with old-styled functions for LibCmdLineC++." );
+    cmdline.set_program_version( std::string(LIBCMDLINECPP_VERSION) );
     
     // Add a positional argument with help text that is required to run the program.
     cmdline.define_option( cmdlinecpp::Option("PATH", "The path to the file to operate on.") );

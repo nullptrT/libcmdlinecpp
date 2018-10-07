@@ -4,7 +4,7 @@
  * @author Sebastian Lau <lauseb644 [at] gmail [dot] com>
  **/
 /*
-    LibCmdLineC++: A simple parser for command line arguments with C++
+    LibCmdLineC++: A simple parser for command line options with C++
     Copyright (C) 2018 Sebastian Lau <lauseb644@gmail.com>
 
     This library is free software; you can redistribute it and/or
@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include "arguments.hpp"
+
 #include <map>
 #include <string>
 
@@ -32,23 +34,69 @@
 namespace cmdlinecpp {
 
 
+/**
+ * @brief A class that holds the parameters specified for options specified in a CmdLineOptions class
+ */
 class CmdLineParameters {
 protected:
+    /**
+     * @brief The parameters that where parsed. The first is the option name that can be looked up and the second is the parameter specified for this option
+     */
     std::map< std::string, std::string > m_parameters;
     
 public:
+    /**
+     * @brief Constructor. Constructs a class with no parameters specified
+     */
     CmdLineParameters();
+    /**
+     * @brief Constructor. Constructs a class with option keys specified by an existing CmdLineArguments environment
+     */
+    CmdLineParameters( const CmdLineArguments* cl_args );
     
-    void add_argument( const std::string argument );
+    /**
+     * @brief Add a new key to this class. Its parameter element will be an empty string until specified.
+     * @param option_name Name of the option
+     */
+    void add_option_key( const std::string option_name );
     
-    void set( const std::string argument
+    /**
+     * @brief Set the parameter element of a given key to a value
+     * @param option_name The name of the option to set the parameter for
+     * @param parameter The value of the option
+     * @throws std::out_of_range If the option key was not found in this class
+     */
+    void set( const std::string option_name
             , const std::string parameter );
     
-    const std::string get( const std::string argument ) const;
+    /**
+     * @brief Get the value for an option
+     * @param option_name Parameter to look up
+     * @returns A string containing the value of the option key. Returns an empty string, if the option for option_name is not found in this class or no value is set for this key
+     */
+    const std::string get( const std::string option_name ) const;
     
-    bool has_argument( const std::string arguments ) const;
+    /**
+     * @brief Test, if an option has an value specified
+     * @param option_name The name of the option to look up
+     * @returns True, if a value is specified for option_name
+     */
+    bool has_value( const std::string option_name ) const;
+    /**
+     * @brief Test, if a key for option_name was specified in this class
+     * @param option_name The name of the option to look up
+     * @returns True, if a option_name is specified as key in this class
+     */
+    bool is_specified( const std::string option_name ) const;
     
+    /**
+     * @brief Get the number of options specified
+     * @returns The number of options specified
+     */
     const size_t size() const;
+    /**
+     * @brief Reset this class to contain no option keys
+     */
     void clear();
 };
 

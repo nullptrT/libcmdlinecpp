@@ -32,41 +32,41 @@
 
 namespace cmdlinecpp {
 
-std::unique_ptr< CmdLineParser > CmdLineParser::ms_cmdlineparser;
+std::unique_ptr< CmdLineInterface > CmdLineInterface::ms_cmdlineparser;
 
 
-CmdLineParser::CmdLineParser()
+CmdLineInterface::CmdLineInterface()
     :   m_cmdline_arguments( new CmdLineArguments() )
     ,   m_argc( 1 )
     ,   m_argv()
     ,   m_cmdline_parameters( new CmdLineParameters() )
     ,   m_current_option_requested( *new Data() )
     ,   m_program_name()
-    ,   m_description()
-    ,   m_version()
+    ,   m_program_description()
+    ,   m_program_version()
     ,   m_usage_examples()
 {}
 
 
-CmdLineParser& CmdLineParser::get() {
+CmdLineInterface& CmdLineInterface::get() {
 
     if( !ms_cmdlineparser ) {
-        ms_cmdlineparser.reset( new CmdLineParser() );
+        ms_cmdlineparser.reset( new CmdLineInterface() );
     }
 
     return *ms_cmdlineparser;
 }
 
 
-void CmdLineParser::define_option( Option option ) {
+void CmdLineInterface::define_option( Option option ) {
     *this << option;
 }
 
 
-CmdLineParser& CmdLineParser::operator<<( Option option ) {
+CmdLineInterface& CmdLineInterface::operator<<( Option option ) {
     bool found_option = false;
-    for ( unsigned int o = 0; o < m_cmdline_arguments->parameters_options().size(); o++ ) {
-        Option option_existing = m_cmdline_arguments->parameters_options().at( o );
+    for ( unsigned int o = 0; o < m_cmdline_arguments->options_regular().size(); o++ ) {
+        Option option_existing = m_cmdline_arguments->options_regular().at( o );
         if ( option.option().compare( option_existing.option() ) == 0 ) {
             found_option = true;
             break;
@@ -74,32 +74,28 @@ CmdLineParser& CmdLineParser::operator<<( Option option ) {
     }
     
     bool found_positional = false;
-    for ( unsigned int p = 0; p < m_cmdline_arguments->parameters_positional().size(); p++ ) {
-        if ( option.option().compare( m_cmdline_arguments->parameters_positional().at( p ).option() ) ) {
+    for ( unsigned int p = 0; p < m_cmdline_arguments->options_positional().size(); p++ ) {
+        if ( option.option().compare( m_cmdline_arguments->options_positional().at( p ).option() ) ) {
             found_positional = true;
             break;
         }
     }
     
     if ( !found_option && !found_positional ) {
-        if ( option.is_positional() ) {
-            m_cmdline_arguments->add_parameter_positional( option );
-        } else {
-            m_cmdline_arguments->add_parameter_option( option );
-        }
+        m_cmdline_arguments->add_option( option );
     }
     
     return *this;
 }
 
 
-CmdLineParser& CmdLineParser::operator<<( int argc ) {
+CmdLineInterface& CmdLineInterface::operator<<( int argc ) {
     m_argc = argc;
     return *this;
 }
 
 
-CmdLineParser& CmdLineParser::operator<<( char** argv ) {
+CmdLineInterface& CmdLineInterface::operator<<( char** argv ) {
     if ( m_argc == 1 ) {
         throw new std::out_of_range("You need to define a size integer with argc before defining argv.");
     }
@@ -113,40 +109,20 @@ CmdLineParser& CmdLineParser::operator<<( char** argv ) {
 }
 
 
-bool CmdLineParser::parse() {
+bool CmdLineInterface::parse() {
     if ( m_argv.size() == 0 ) {
         std::cerr << "No parameters to parse." << std::endl;
         return false;
     } else {
-        m_cmdline_parameters->clear();
-        
-        for ( unsigned int o = 0
-            ; o < m_cmdline_arguments->parameters_options().size()
-            ; o++
-        ) {
-            Option option = m_cmdline_arguments->parameters_options().at( o );
-            m_cmdline_parameters->add_argument( option.option() );
-            
-            if ( option.dataType() == Data::Type::Bool ) {
-                m_cmdline_parameters->set( option.option(), FALSE );
-            }
-        }
-        
-        for ( unsigned int o = 0
-            ; o < m_cmdline_arguments->parameters_positional().size()
-            ; o++
-        ) {
-            Option option = m_cmdline_arguments->parameters_positional().at( o );
-            m_cmdline_parameters->add_argument( option.option() );
-        }
+        m_cmdline_parameters = new CmdLineParameters( m_cmdline_arguments );
     }
     
     unsigned int positional = 0;
     unsigned int a = m_argv.size() - 1;
-    while ( positional < m_cmdline_arguments->parameters_positional().size()
+    while ( positional < m_cmdline_arguments->options_positional().size()
          && a > 1
     ) {
-        Option argument_name_positional = m_cmdline_arguments->parameters_positional().at( m_cmdline_arguments->parameters_positional().size() - positional );
+        Option argument_name_positional = m_cmdline_arguments->options_positional().at( m_cmdline_arguments->options_positional().size() - positional );
         
         m_cmdline_parameters->set( argument_name_positional.option(), m_argv.at(a) );
         
@@ -155,7 +131,7 @@ bool CmdLineParser::parse() {
     }
     
 
-    if ( a != m_cmdline_arguments->parameters_positional().size() ) {
+    if ( a != m_cmdline_arguments->options_positional().size() ) {
         throw new std::out_of_range("Not all positional arguments are specified.");
     }
 
@@ -165,7 +141,7 @@ bool CmdLineParser::parse() {
     while ( a < begin_positionals ) {
         std::string parameter = m_argv.at( a );
         
-        if ( m_cmdline_arguments->is_option( parameter ) ) {
+        if ( m_cmdline_arguments->is_option_regular( parameter ) ) {
             Option option = m_cmdline_arguments->lookup_option( parameter );
             
             if ( option.dataType() == Data::Type::Bool ) {
@@ -193,7 +169,7 @@ bool CmdLineParser::parse() {
 }
 
 
-bool CmdLineParser::parse( int argc, char** argv ) {
+bool CmdLineInterface::parse( int argc, char** argv ) {
     m_argc = argc;
     *this << argv;
     
@@ -201,12 +177,12 @@ bool CmdLineParser::parse( int argc, char** argv ) {
 }
 
 
-const std::string CmdLineParser::operator[]( const std::string key ) const {
+const std::string CmdLineInterface::operator[]( const std::string key ) const {
     return m_cmdline_parameters->get( key );
 }
 
 
-bool CmdLineParser::is_specified( const std::string key ) const {
+bool CmdLineInterface::is_specified( const std::string key ) const {
     if ( m_cmdline_parameters->get( key ).length() > 0 ) {
         return true;
     }
@@ -214,7 +190,7 @@ bool CmdLineParser::is_specified( const std::string key ) const {
 }
 
 
-const Data::Type CmdLineParser::dataTypeOfOption( const std::string key ) const {
+const Data::Type CmdLineInterface::dataTypeOfOption( const std::string key ) const {
     try {
         Option option = m_cmdline_arguments->lookup_option( key );
         return option.dataType();
@@ -231,32 +207,60 @@ const Data::Type CmdLineParser::dataTypeOfOption( const std::string key ) const 
 }
 
 
-void CmdLineParser::set_program_name( const std::string program_name ) {
+void CmdLineInterface::set_program_name( const std::string program_name ) {
     m_program_name = program_name;
 }
 
 
-void CmdLineParser::set_description( const std::string description ) {
-    m_description = description;
+void CmdLineInterface::set_program_description( const std::string program_description ) {
+    m_program_description = program_description;
 }
 
 
-void CmdLineParser::set_version( const std::string version ) {
-    m_version = version;
+void CmdLineInterface::set_program_version( const std::string program_version ) {
+    m_program_version = program_version;
 }
 
 
-void CmdLineParser::add_usage_example( const std::string usage_example ) {
+void CmdLineInterface::define_program( const std::string program_name, const std::string program_description, const std::string program_version ) {
+    this->set_program_name( program_name );
+    this->set_program_description( program_description );
+    this->set_program_version( program_version );
+}
+
+
+void CmdLineInterface::add_usage_example( const std::string usage_example ) {
     m_usage_examples.push_back( usage_example );
 }
 
 
-void CmdLineParser::print_help() const {
+void CmdLineInterface::print_help() const {
     
 }
 
 
-void CmdLineParser::to_variable( const std::string key, bool& value ) {
+void CmdLineInterface::to_variable( const std::string key, bool& value ) {
+    m_current_option_requested = Data( key );
+    if ( !m_current_option_requested.is_valid() ) {
+        throw new std::out_of_range("Requested option not set with a Data object.");
+    }
+    
+    try {
+        Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
+        if ( option.dataType() != Data::Type::Double ) {
+            throw new exceptions::TypeError("Expected double as data type.");
+        }
+    } catch ( CmdLineArguments::NotFound& clanf ) {
+        try {
+            Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
+            if ( option.dataType() != Data::Type::Double ) {
+                throw new exceptions::TypeError("Expected double as data type.");
+            }
+        } catch ( CmdLineArguments::NotFound& clanf ) {
+            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+        }
+    }
+    
     std::string bool_value = m_cmdline_parameters->get( key );
     
     if ( bool_value == TRUE ) {
@@ -267,7 +271,7 @@ void CmdLineParser::to_variable( const std::string key, bool& value ) {
 }
 
 
-void CmdLineParser::to_variable( const std::string key, double& value ) {
+void CmdLineInterface::to_variable( const std::string key, double& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
@@ -295,7 +299,7 @@ void CmdLineParser::to_variable( const std::string key, double& value ) {
 }
 
 
-void CmdLineParser::to_variable( const std::string key, long& value ) {
+void CmdLineInterface::to_variable( const std::string key, long& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
@@ -323,7 +327,7 @@ void CmdLineParser::to_variable( const std::string key, long& value ) {
 }
 
 
-void CmdLineParser::to_variable( const std::string key, int& value ) {
+void CmdLineInterface::to_variable( const std::string key, int& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
@@ -351,7 +355,7 @@ void CmdLineParser::to_variable( const std::string key, int& value ) {
 }
 
 
-void CmdLineParser::to_variable( const std::string key, short& value ) {
+void CmdLineInterface::to_variable( const std::string key, short& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
@@ -379,7 +383,7 @@ void CmdLineParser::to_variable( const std::string key, short& value ) {
 }
 
 
-void CmdLineParser::to_variable( const std::string key, std::string& value ) {
+void CmdLineInterface::to_variable( const std::string key, std::string& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
@@ -407,7 +411,7 @@ void CmdLineParser::to_variable( const std::string key, std::string& value ) {
 }
 
 
-void CmdLineParser::to_variable( const std::string key, unsigned long& value ) {
+void CmdLineInterface::to_variable( const std::string key, unsigned long& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
@@ -435,7 +439,7 @@ void CmdLineParser::to_variable( const std::string key, unsigned long& value ) {
 }
 
 
-void CmdLineParser::to_variable( const std::string key, unsigned int& value ) {
+void CmdLineInterface::to_variable( const std::string key, unsigned int& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
@@ -463,7 +467,7 @@ void CmdLineParser::to_variable( const std::string key, unsigned int& value ) {
 }
 
 
-void CmdLineParser::to_variable( const std::string key, unsigned short& value ) {
+void CmdLineInterface::to_variable( const std::string key, unsigned short& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
@@ -491,14 +495,14 @@ void CmdLineParser::to_variable( const std::string key, unsigned short& value ) 
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( Data option_requested ) {
-    m_current_option_requested = option_requested;
+CmdLineInterface& CmdLineInterface::operator>>( Data data_requested ) {
+    m_current_option_requested = data_requested;
     
     return *this;
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( bool& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( bool& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
@@ -509,7 +513,7 @@ CmdLineParser& CmdLineParser::operator>>( bool& value ) {
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( double& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( double& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
@@ -520,7 +524,7 @@ CmdLineParser& CmdLineParser::operator>>( double& value ) {
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( long& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( long& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
@@ -531,7 +535,7 @@ CmdLineParser& CmdLineParser::operator>>( long& value ) {
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( int& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( int& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
@@ -542,7 +546,7 @@ CmdLineParser& CmdLineParser::operator>>( int& value ) {
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( short& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( short& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
@@ -553,7 +557,7 @@ CmdLineParser& CmdLineParser::operator>>( short& value ) {
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( std::string& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( std::string& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
@@ -564,7 +568,7 @@ CmdLineParser& CmdLineParser::operator>>( std::string& value ) {
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( unsigned long& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( unsigned long& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
@@ -575,7 +579,7 @@ CmdLineParser& CmdLineParser::operator>>( unsigned long& value ) {
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( unsigned int& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( unsigned int& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
@@ -586,7 +590,7 @@ CmdLineParser& CmdLineParser::operator>>( unsigned int& value ) {
 }
 
 
-CmdLineParser& CmdLineParser::operator>>( unsigned short& value ) {
+CmdLineInterface& CmdLineInterface::operator>>( unsigned short& value ) {
     if ( !m_current_option_requested.is_valid() ) {
         throw new std::out_of_range("Requested option not set with a Data object.");
     }
