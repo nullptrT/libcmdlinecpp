@@ -37,7 +37,7 @@ std::unique_ptr< CmdLineInterface > CmdLineInterface::ms_cmdlineparser;
 
 CmdLineInterface::CmdLineInterface()
     :   m_cmdline_arguments( new CmdLineArguments() )
-    ,   m_argc( 1 )
+    ,   m_argc( 0 )
     ,   m_argv()
     ,   m_cmdline_parameters( new CmdLineParameters() )
     ,   m_current_option_requested( *new Data() )
@@ -45,7 +45,9 @@ CmdLineInterface::CmdLineInterface()
     ,   m_program_description()
     ,   m_program_version()
     ,   m_usage_examples()
-{}
+{
+    *this << Option( "help", 'h', "Print the help for this program", Data::Type::Bool );
+}
 
 
 CmdLineInterface& CmdLineInterface::get() {
@@ -75,7 +77,7 @@ CmdLineInterface& CmdLineInterface::operator<<( Option option ) {
     
     bool found_positional = false;
     for ( unsigned int p = 0; p < m_cmdline_arguments->options_positional().size(); p++ ) {
-        if ( option.option().compare( m_cmdline_arguments->options_positional().at( p ).option() ) ) {
+        if ( option.option().compare( m_cmdline_arguments->options_positional().at( p ).option() ) == 0 ) {
             found_positional = true;
             break;
         }
@@ -96,8 +98,8 @@ CmdLineInterface& CmdLineInterface::operator<<( int argc ) {
 
 
 CmdLineInterface& CmdLineInterface::operator<<( char** argv ) {
-    if ( m_argc == 1 ) {
-        throw new std::out_of_range("You need to define a size integer with argc before defining argv.");
+    if ( m_argc == 0 ) {
+        throw std::out_of_range("You need to define a size integer with argc before defining argv.");
     }
     
     for ( unsigned int a = 0; a < m_argc; a++ ) {
@@ -132,7 +134,7 @@ bool CmdLineInterface::parse() {
     
 
     if ( a != m_cmdline_arguments->options_positional().size() ) {
-        throw new std::out_of_range("Not all positional arguments are specified.");
+        throw std::out_of_range("Not all positional arguments are specified.");
     }
 
     unsigned int begin_positionals = a;
@@ -150,9 +152,9 @@ bool CmdLineInterface::parse() {
                 ++a;
             } else {
                 if ( a+1 == begin_positionals ) {
-                    throw new std::out_of_range("No parameter argument specified for '" + parameter + "'.");
+                    throw std::out_of_range("No parameter argument specified for '" + parameter + "'.");
                 } else if ( parameter.compare( 0, 1, "-" ) ) {
-                    throw new std::out_of_range("No parameter argument specified for '" + parameter + "'.");
+                    throw std::out_of_range("No parameter argument specified for '" + parameter + "'.");
                 }
                 
                 m_cmdline_parameters->set( parameter, m_argv.at(a+1) );
@@ -183,9 +185,17 @@ const std::string CmdLineInterface::operator[]( const std::string key ) const {
 
 
 bool CmdLineInterface::is_specified( const std::string key ) const {
-    if ( m_cmdline_parameters->get( key ).length() > 0 ) {
-        return true;
+    if ( m_cmdline_parameters->is_specified( key ) ) {
+        Option option = m_cmdline_arguments->lookup_option( key );
+        if ( m_cmdline_parameters->get( key ).length() ==  0 && option.dataType() != Data::Type::Bool ) {
+            return false;
+        } else if ( m_cmdline_parameters->get( key ).length() == 0 && option.dataType() == Data::Type::Bool ) {
+            return true;
+        } else {
+            return true;
+        }
     }
+    
     return false;
 }
 
@@ -234,30 +244,121 @@ void CmdLineInterface::add_usage_example( const std::string usage_example ) {
 }
 
 
+bool CmdLineInterface::help_requested() const {
+    if ( m_cmdline_parameters->get("help").compare(TRUE) == 0 ) {
+        return true;
+    }
+    return false;
+}
+
+
 void CmdLineInterface::print_help() const {
+    std::cout << m_program_name << " v" << m_program_version << std::endl;
+    std::cout << m_program_description << std::endl;
+    std::cout << std::endl;
+    std::cout << m_program_name << " [--help,-h] [OPTIONS...]";
+    for ( unsigned int o = 0
+        ; o < m_cmdline_arguments->options_positional().size()
+        ; o++
+    ) {
+        Option option = m_cmdline_arguments->options_positional().at( o );
+        
+        std::cout << " <" << option.option() << ">";
+    }
     
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << "OPTIONS:" << std::endl;
+    
+    for ( unsigned int o = 0
+        ; o < m_cmdline_arguments->options_regular().size()
+        ; o++
+    ) {
+        Option option = m_cmdline_arguments->options_regular().at( o );
+        
+        std::cout << "\t-" << option.option_short() << ", --" << option.option();
+        if ( option.option().length() < 5 ) {
+            std::cout << "\t\t\t";
+        } else {
+            std::cout << "\t\t";
+        }
+        
+        const std::string help_text = option.help_text();
+        for ( unsigned int pos = 0; pos < help_text.length()+59; pos += 60 ) {
+            if ( pos > 0 ) {
+                std::cout << "\t\t\t\t";
+            }
+            if ( pos + 60 > help_text.length() ) {
+                std::cout << help_text.substr( pos );
+                break;
+            } else {
+                std::cout << help_text.substr( pos, pos+60 ) << std::endl;
+            }
+        }
+        
+        std::cout << std::endl;
+    }
+    
+    std::cout << std::endl << std::endl;
+    std::cout << "POSITIONAL ARGUMENTS:" << std::endl;
+    for ( unsigned int o = 0
+        ; o < m_cmdline_arguments->options_positional().size()
+        ; o++
+    ) {
+        Option option = m_cmdline_arguments->options_positional().at( o );
+        
+        std::cout << "\t" << option.option();
+        if ( option.option().length() < 5 ) {
+            std::cout << "\t\t";
+        } else {
+            std::cout << "\t";
+        }
+        
+        const std::string help_text = option.help_text();
+        for ( unsigned int pos = 0; pos < help_text.length()+59; pos += 60 ) {
+            if ( pos > 0 ) {
+                std::cout << "\t\t\t\t";
+            }
+            if ( pos + 60 > help_text.length() ) {
+                std::cout << help_text.substr( pos );
+                break;
+            } else {
+                std::cout << help_text.substr( pos, pos+60 ) << std::endl;
+            }
+        }
+        
+        std::cout << std::endl;
+    }
+}
+
+
+void CmdLineInterface::print_help_if_requested() const {
+    if ( this->help_requested() ) {
+        this->print_help();
+        std::exit( 0 );
+    }
 }
 
 
 void CmdLineInterface::to_variable( const std::string key, bool& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::Double ) {
-            throw new exceptions::TypeError("Expected double as data type.");
+            throw exceptions::TypeError("Expected double as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::Double ) {
-                throw new exceptions::TypeError("Expected double as data type.");
+                throw exceptions::TypeError("Expected double as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -274,22 +375,22 @@ void CmdLineInterface::to_variable( const std::string key, bool& value ) {
 void CmdLineInterface::to_variable( const std::string key, double& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::Double ) {
-            throw new exceptions::TypeError("Expected double as data type.");
+            throw exceptions::TypeError("Expected double as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::Double ) {
-                throw new exceptions::TypeError("Expected double as data type.");
+                throw exceptions::TypeError("Expected double as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -302,22 +403,22 @@ void CmdLineInterface::to_variable( const std::string key, double& value ) {
 void CmdLineInterface::to_variable( const std::string key, long& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::Long ) {
-            throw new exceptions::TypeError("Expected long as data type.");
+            throw exceptions::TypeError("Expected long as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::Long ) {
-                throw new exceptions::TypeError("Expected long as data type.");
+                throw exceptions::TypeError("Expected long as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -330,22 +431,22 @@ void CmdLineInterface::to_variable( const std::string key, long& value ) {
 void CmdLineInterface::to_variable( const std::string key, int& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::Int ) {
-            throw new exceptions::TypeError("Expected int as data type.");
+            throw exceptions::TypeError("Expected int as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::Int ) {
-                throw new exceptions::TypeError("Expected int as data type.");
+                throw exceptions::TypeError("Expected int as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -358,22 +459,22 @@ void CmdLineInterface::to_variable( const std::string key, int& value ) {
 void CmdLineInterface::to_variable( const std::string key, short& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::Short ) {
-            throw new exceptions::TypeError("Expected short as data type.");
+            throw exceptions::TypeError("Expected short as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::Short ) {
-                throw new exceptions::TypeError("Expected short as data type.");
+                throw exceptions::TypeError("Expected short as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -386,22 +487,22 @@ void CmdLineInterface::to_variable( const std::string key, short& value ) {
 void CmdLineInterface::to_variable( const std::string key, std::string& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::String ) {
-            throw new exceptions::TypeError("Expected std::string as data type.");
+            throw exceptions::TypeError("Expected std::string as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::String ) {
-                throw new exceptions::TypeError("Expected std::string as data type.");
+                throw exceptions::TypeError("Expected std::string as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -414,22 +515,22 @@ void CmdLineInterface::to_variable( const std::string key, std::string& value ) 
 void CmdLineInterface::to_variable( const std::string key, unsigned long& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::UnsignedLong ) {
-            throw new exceptions::TypeError("Expected unsigned long as data type.");
+            throw exceptions::TypeError("Expected unsigned long as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::UnsignedLong ) {
-                throw new exceptions::TypeError("Expected unsigned long as data type.");
+                throw exceptions::TypeError("Expected unsigned long as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -442,22 +543,22 @@ void CmdLineInterface::to_variable( const std::string key, unsigned long& value 
 void CmdLineInterface::to_variable( const std::string key, unsigned int& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::UnsignedInt ) {
-            throw new exceptions::TypeError("Expected unsigned int as data type.");
+            throw exceptions::TypeError("Expected unsigned int as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::UnsignedInt ) {
-                throw new exceptions::TypeError("Expected unsigned int as data type.");
+                throw exceptions::TypeError("Expected unsigned int as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -470,22 +571,22 @@ void CmdLineInterface::to_variable( const std::string key, unsigned int& value )
 void CmdLineInterface::to_variable( const std::string key, unsigned short& value ) {
     m_current_option_requested = Data( key );
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     try {
         Option option = m_cmdline_arguments->lookup_option( m_current_option_requested.key() );
         if ( option.dataType() != Data::Type::UnsignedShort ) {
-            throw new exceptions::TypeError("Expected unsigned short as data type.");
+            throw exceptions::TypeError("Expected unsigned short as data type.");
         }
     } catch ( CmdLineArguments::NotFound& clanf ) {
         try {
             Option option = m_cmdline_arguments->lookup_positional( m_current_option_requested.key() );
             if ( option.dataType() != Data::Type::UnsignedShort ) {
-                throw new exceptions::TypeError("Expected unsigned short as data type.");
+                throw exceptions::TypeError("Expected unsigned short as data type.");
             }
         } catch ( CmdLineArguments::NotFound& clanf ) {
-            throw new CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
+            throw CmdLineArguments::NotFound("Did not find '" + m_current_option_requested.key() + "' as option.");
         }
     }
     
@@ -504,7 +605,7 @@ CmdLineInterface& CmdLineInterface::operator>>( Data data_requested ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( bool& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );
@@ -515,7 +616,7 @@ CmdLineInterface& CmdLineInterface::operator>>( bool& value ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( double& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );
@@ -526,7 +627,7 @@ CmdLineInterface& CmdLineInterface::operator>>( double& value ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( long& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );
@@ -537,7 +638,7 @@ CmdLineInterface& CmdLineInterface::operator>>( long& value ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( int& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );
@@ -548,7 +649,7 @@ CmdLineInterface& CmdLineInterface::operator>>( int& value ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( short& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );
@@ -559,7 +660,7 @@ CmdLineInterface& CmdLineInterface::operator>>( short& value ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( std::string& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );
@@ -570,7 +671,7 @@ CmdLineInterface& CmdLineInterface::operator>>( std::string& value ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( unsigned long& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );
@@ -581,7 +682,7 @@ CmdLineInterface& CmdLineInterface::operator>>( unsigned long& value ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( unsigned int& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );
@@ -592,7 +693,7 @@ CmdLineInterface& CmdLineInterface::operator>>( unsigned int& value ) {
 
 CmdLineInterface& CmdLineInterface::operator>>( unsigned short& value ) {
     if ( !m_current_option_requested.is_valid() ) {
-        throw new std::out_of_range("Requested option not set with a Data object.");
+        throw std::out_of_range("Requested option not set with a Data object.");
     }
     
     this->to_variable( m_current_option_requested.key(), value );

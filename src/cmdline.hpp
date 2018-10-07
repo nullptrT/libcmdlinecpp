@@ -182,9 +182,20 @@ public:
      */
     void add_usage_example( const std::string usage_example );
     /**
+     * @brief Check, if the help parameter was specified
+     * @returns True, if either --help or -h were specified
+     */
+    bool help_requested() const;
+    /**
      * @brief Print a formatted help
      */
     void print_help() const;
+    /**
+     * @brief Prints a formatted help, if either --help or -h were specified
+     * @note Should be called after parsing the command line parameters
+     * @warning Exits the program with status code 0, if help is requested
+     */
+    void print_help_if_requested() const;
     
     /**
      * @brief Specify the requested data's key and occurence to get as next output of the operator>> functions

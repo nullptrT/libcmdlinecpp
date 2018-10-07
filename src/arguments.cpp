@@ -84,16 +84,16 @@ Option::Option( const std::string option_long
     ,   m_data_type( data_type )
 {
     if ( m_option.second.length() == 0 ) {
-        throw new std::logic_error("The parameter option_short does not need to be the empty character.");
+        throw std::logic_error("The parameter option_short does not need to be the empty character.");
     }
 }
 
 
 bool Option::is_positional() const {
     if ( m_option.second.length() == 0 ) {
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 
@@ -220,7 +220,7 @@ const Option CmdLineArguments::lookup_positional( const std::string option_name 
         }
     }
 
-    throw new NotFound("Could not find positional option '"  + option_name + "'.");
+    throw NotFound("Could not find positional option '"  + option_name + "'.");
 }
 
 
@@ -232,7 +232,7 @@ const Option CmdLineArguments::lookup_option( const std::string option_name ) co
         }
     }
 
-    throw new NotFound("Could not find option '"  + option_name + "'.");
+    throw NotFound("Could not find option '"  + option_name + "'.");
 }
 
 

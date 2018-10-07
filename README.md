@@ -62,7 +62,7 @@ int main( int argc, char** argv ) {
     cmdlinecpp::Option option_iterations
         = cmdlinecpp::Option( "iterations", 'n'
                             , "The number of iterations the program makes."
-                            , cmdlinecpp::Data::Int);
+                            , cmdlinecpp::Data::Int );
     // Add some more help text to the option.
     option_iterations << "This is needed for testing purposes.";
     // Add the new option to the command line parser.
@@ -87,14 +87,16 @@ int main( int argc, char** argv ) {
         return 1;
     }
     
-    
+    // If the help option is specified, this function will print the help and exit with 0
+    cmdline.print_help_if_requested();
+        
     // DO SOMETHING IN YOUR PROGRAM
     
     // ACCESS THE VALUES OF THE PARAMETERS WITH DIFFERENT DATA TYPES
     // Required parameters can be safely accessed as they need to be specified
     std::string path;
-    cmdline >> cmdlinecpp::Data("path") >> path;
-    std::string path2 = cmdline["path"];
+    cmdline >> cmdlinecpp::Data("PATH") >> path;
+    std::string path2 = cmdline["PATH"];
     
     int n = 1;
     // Since the option "iterations" is optional, you should guard its access with an if statement
@@ -102,7 +104,6 @@ int main( int argc, char** argv ) {
         cmdline >> cmdlinecpp::Data("iterations") >> n;
     }
     
-
     for ( unsigned int i = 0; i < n; i++ ) {
         // DO SOMETHING ELSE IN YOUR PROGRAM
     }
@@ -110,7 +111,6 @@ int main( int argc, char** argv ) {
     
     return 0;
 }
-
 ```
 
 The same functionality can be provided by not using the streaming API of libcmdlinecpp. This is demonstrated in `main2.cpp` (see next code example). Both API definitions can be used together, it does not matter, that you use some old-fashioned functions beside the streaming API. It is recommended to use the API with streaming.

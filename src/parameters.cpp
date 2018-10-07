@@ -79,7 +79,7 @@ void CmdLineParameters::set( const std::string option_name, const std::string pa
 
 const std::string CmdLineParameters::get( const std::string option_name ) const {
     try {
-        return m_parameters.at( option_name );
+         return m_parameters.at( option_name );
     } catch ( std::exception& e ) {
         std::cerr << "Argument '" << option_name << "' not found in parameter list." << std::endl;
     }

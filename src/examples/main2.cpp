@@ -62,8 +62,12 @@ int main( int argc, char** argv ) {
         return 1;
     }
     
+    // If the help option is specified, this function will print the help and exit with 0
+    cmdline.print_help_if_requested();
+    
     
     // DO SOMETHING IN YOUR PROGRAM
+    
     
     // ACCESS THE VALUES OF THE PARAMETERS WITH DIFFERENT DATA TYPES
     // Required parameters can be safely accessed as they need to be specified
