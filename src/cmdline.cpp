@@ -46,7 +46,7 @@ CmdLineInterface::CmdLineInterface()
     ,   m_program_version()
     ,   m_usage_examples()
 {
-    *this << Option( "help", 'h', "Print the help for this program", Data::Type::Bool );
+    *this << Option( "help", "h", "Print the help for this program", Data::Type::Bool );
 }
 
 

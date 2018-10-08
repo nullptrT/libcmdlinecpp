@@ -38,7 +38,7 @@ int main( int argc, char** argv ) {
     
     // Define another optional Option. Optional options have an additional short parameter.
     cmdlinecpp::Option option_iterations
-        = cmdlinecpp::Option( "iterations", 'n'
+        = cmdlinecpp::Option( "iterations", "n"
                             , "The number of iterations the program makes."
                             , cmdlinecpp::Data::Type::Int );
     // Add some more help text to the option.

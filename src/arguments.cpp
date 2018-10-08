@@ -76,15 +76,17 @@ Option::Option( const std::string option_long
 
 
 Option::Option( const std::string option_long
-              , const char option_short
+              , const std::string option_short
               , const std::string help_text
               , Data::Type data_type )
-    :   m_option( option_long, std::to_string(option_short) )
+    :   m_option( option_long, option_short )
     ,   m_help_text( help_text )
     ,   m_data_type( data_type )
 {
     if ( m_option.second.length() == 0 ) {
-        throw std::logic_error("The parameter option_short does not need to be the empty character.");
+        throw std::logic_error("The parameter option_short does not need to be the empty string.");
+    } else if ( m_option.second.length() > 3 ) {
+        throw std::logic_error("The parameter option_short has a maximum of 3 characters to specify.");
     }
 }
 
@@ -120,8 +122,8 @@ const std::string Option::option() const {
 }
 
 
-const char Option::option_short() const {
-    return m_option.second[0];
+const std::string Option::option_short() const {
+    return m_option.second;
 }
 
 
@@ -184,7 +186,7 @@ bool CmdLineArguments::is_option_regular( const std::string parameter ) const {
         Option option = m_options.at( o );
         
         if ( option_str.compare( option.option() ) == 0
-          || option_str.compare( std::to_string(option.option_short()) ) == 0
+          || option_str.compare( option.option_short() ) == 0
         ) {
            return true; 
         }

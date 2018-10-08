@@ -133,19 +133,19 @@ public:
      * @param data_type The Data::Type of this positional argument. Defaults to Data::Type::String.
      */
     Option( const std::string option_long
-          , const std::string help_text = std::string("")
+          , const std::string help_text
           , Data::Type data_type = Data::Type::String );
     /**
      * @brief Constructor for regular options.
      * @param option_long The name and long option specifier of this regular option
-     * @param option_short The short option specifier of this regular option
+     * @param option_short The short option specifier of this regular option (1-3 character)
      * @param help_text The help text of this regular option. Defaults to an empty string.
      * @param data_type The Data::Type of this regular argument. Defaults to Data::Type::String.
      * @throws logic_error If option_short is an empty character
      */
     Option( const std::string option_long
-          , const char option_short
-          , const std::string help_text = std::string("")
+          , const std::string option_short
+          , const std::string help_text
           , Data::Type data_type = Data::Type::String );
     
     /**
@@ -176,10 +176,10 @@ public:
     const std::string option() const;
     /**
      * @brief Get the short specifier of this regular option
-     * @returns The character passed as parameter option_short to the constructor
+     * @returns The 1-3 characters passed as parameter option_short to the constructor
      * @warning Returns an empty string on positional argument options
      */
-    const char option_short() const;
+    const std::string option_short() const;
     /**
      * @brief Get the help text
      * @returns The help text
