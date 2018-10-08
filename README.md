@@ -26,8 +26,8 @@ More features can be requested through issues on [GitHub](https://github.com/nul
 
 ## Future features
 
-* An action without parameter as first argument
-* A list as last positional argument
+* An action without parameter as first argument like `program_name action [OPTION...]`
+* A list as last positional argument like `program_name <POSITIONAL1> <POSITIONAL2...>`
 
 
 ## License:
