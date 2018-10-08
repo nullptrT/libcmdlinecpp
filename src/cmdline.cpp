@@ -256,68 +256,83 @@ void CmdLineInterface::print_help() const {
         std::cout << " <" << option.option() << ">";
     }
     
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << "OPTIONS:" << std::endl;
-    
-    for ( unsigned int o = 0
-        ; o < m_cmdline_arguments->options_regular().size()
-        ; o++
-    ) {
-        Option option = m_cmdline_arguments->options_regular().at( o );
-        
-        std::cout << "\t-" << option.option_short() << ", --" << option.option();
-        if ( option.option().length() < 5 ) {
-            std::cout << "\t\t\t";
-        } else {
-            std::cout << "\t\t";
-        }
-        
-        const std::string help_text = option.help_text();
-        for ( unsigned int pos = 0; pos < help_text.length()+59; pos += 60 ) {
-            if ( pos > 0 ) {
-                std::cout << "\t\t\t\t";
-            }
-            if ( pos + 60 > help_text.length() ) {
-                std::cout << help_text.substr( pos );
-                break;
-            } else {
-                std::cout << help_text.substr( pos, pos+60 ) << std::endl;
-            }
-        }
-        
+    if ( m_usage_examples.size() > 0 ) {
         std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << "Usage:" << std::endl;
+        
+        for ( unsigned int u = 0; u < m_usage_examples.size(); u++ ) {
+            std::cout << m_usage_examples.at( u ) << std::endl;
+        }
     }
     
-    std::cout << std::endl << std::endl;
-    std::cout << "POSITIONAL ARGUMENTS:" << std::endl;
-    for ( unsigned int o = 0
-        ; o < m_cmdline_arguments->options_positional().size()
-        ; o++
-    ) {
-        Option option = m_cmdline_arguments->options_positional().at( o );
-        
-        std::cout << "\t" << option.option();
-        if ( option.option().length() < 5 ) {
-            std::cout << "\t\t";
-        } else {
-            std::cout << "\t";
-        }
-        
-        const std::string help_text = option.help_text();
-        for ( unsigned int pos = 0; pos < help_text.length()+59; pos += 60 ) {
-            if ( pos > 0 ) {
-                std::cout << "\t\t\t\t";
-            }
-            if ( pos + 60 > help_text.length() ) {
-                std::cout << help_text.substr( pos );
-                break;
-            } else {
-                std::cout << help_text.substr( pos, pos+60 ) << std::endl;
-            }
-        }
-        
+    if ( m_cmdline_arguments->options_regular().size() > 0 ) {
         std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << "OPTIONS:" << std::endl;
+        
+        for ( unsigned int o = 0
+            ; o < m_cmdline_arguments->options_regular().size()
+            ; o++
+        ) {
+            Option option = m_cmdline_arguments->options_regular().at( o );
+            
+            std::cout << "\t-" << option.option_short() << ", --" << option.option();
+            if ( option.option().length() < 5 ) {
+                std::cout << "\t\t\t";
+            } else {
+                std::cout << "\t\t";
+            }
+            
+            const std::string help_text = option.help_text();
+            for ( unsigned int pos = 0; pos < help_text.length()+59; pos += 60 ) {
+                if ( pos > 0 ) {
+                    std::cout << "\t\t\t\t";
+                }
+                if ( pos + 60 > help_text.length() ) {
+                    std::cout << help_text.substr( pos );
+                    break;
+                } else {
+                    std::cout << help_text.substr( pos, pos+60 ) << std::endl;
+                }
+            }
+            
+            std::cout << std::endl;
+        }
+    }
+    
+    if ( m_cmdline_arguments->options_positional().size() > 0 ) {
+        std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << "POSITIONAL ARGUMENTS:" << std::endl;
+        for ( unsigned int o = 0
+            ; o < m_cmdline_arguments->options_positional().size()
+            ; o++
+        ) {
+            Option option = m_cmdline_arguments->options_positional().at( o );
+            
+            std::cout << "\t" << option.option();
+            if ( option.option().length() < 5 ) {
+                std::cout << "\t\t";
+            } else {
+                std::cout << "\t";
+            }
+            
+            const std::string help_text = option.help_text();
+            for ( unsigned int pos = 0; pos < help_text.length()+59; pos += 60 ) {
+                if ( pos > 0 ) {
+                    std::cout << "\t\t\t\t";
+                }
+                if ( pos + 60 > help_text.length() ) {
+                    std::cout << help_text.substr( pos );
+                    break;
+                } else {
+                    std::cout << help_text.substr( pos, pos+60 ) << std::endl;
+                }
+            }
+            
+            std::cout << std::endl;
+        }
     }
 }
 
