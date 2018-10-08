@@ -119,54 +119,44 @@ bool CmdLineInterface::parse() {
         m_cmdline_parameters = new CmdLineParameters( m_cmdline_arguments );
     }
     
-    unsigned int positional = 0;
-    unsigned int a = m_argv.size() - 1;
-    while ( positional < m_cmdline_arguments->options_positional().size()
-         && a > 1
-    ) {
-        Option argument_name_positional = m_cmdline_arguments->options_positional().at( m_cmdline_arguments->options_positional().size() - positional );
-        
-        m_cmdline_parameters->set( argument_name_positional.option(), m_argv.at(a) );
-        
-        ++positional;
-        --a;
+    unsigned int options_regular = 0;
+    unsigned int options_positional = 0;
+    unsigned int a = 1;
+    while ( a < m_argv.size() ) {
+        std::string argument = m_argv.at( a );
+        if ( m_cmdline_arguments->is_option_regular( argument ) ) {
+            // Is regular option
+            ++options_regular;
+            
+            Option option = m_cmdline_arguments->lookup_option( argument );
+            
+            if ( option.dataType() != Data::Type::Bool ) {
+                if ( a+1 == m_argv.size() ) {
+                    throw std::out_of_range("The data type of '" + argument + "' is not bool, but there are no more parameters to parse.");
+                } else {
+                    m_cmdline_parameters->set( option.option(), m_argv.at(a+1) );
+                    a += 2;
+                }
+            } else {
+                m_cmdline_parameters->set( option.option(), TRUE );
+                ++a;
+            }
+            
+        } else {
+            // Is positional option
+            Option option = m_cmdline_arguments->options_positional().at( options_positional );
+            
+            m_cmdline_parameters->set( option.option(), argument );
+            
+            ++options_positional;
+            ++a;
+        }
     }
     
-
-    if ( a != m_cmdline_arguments->options_positional().size() ) {
+    if ( options_positional != m_cmdline_arguments->options_positional().size() ) {
         throw std::out_of_range("Not all positional arguments are specified.");
     }
 
-    unsigned int begin_positionals = a;
-    unsigned int options = 0;
-    a = 1;
-    while ( a < begin_positionals ) {
-        std::string parameter = m_argv.at( a );
-        
-        if ( m_cmdline_arguments->is_option_regular( parameter ) ) {
-            Option option = m_cmdline_arguments->lookup_option( parameter );
-            
-            if ( option.dataType() == Data::Type::Bool ) {
-                m_cmdline_parameters->set( parameter, TRUE );
-                ++options;
-                ++a;
-            } else {
-                if ( a+1 == begin_positionals ) {
-                    throw std::out_of_range("No parameter argument specified for '" + parameter + "'.");
-                } else if ( parameter.compare( 0, 1, "-" ) ) {
-                    throw std::out_of_range("No parameter argument specified for '" + parameter + "'.");
-                }
-                
-                m_cmdline_parameters->set( parameter, m_argv.at(a+1) );
-                
-                ++options;
-                a += 2;
-            }
-        }
-        
-        
-    }
-    
     return true;
 }
 

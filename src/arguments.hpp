@@ -252,12 +252,12 @@ public:
      */
     const Option lookup_positional( const std::string option_name ) const;
     /**
-     * @brief Find a regular option by its name
-     * @param option_name The name to look for
+     * @brief Find a regular option by its name or short option
+     * @param parameter The name or short parameter to look for
      * @returns The option found
      * @throws NotFound Only if the option is not found
      */
-    const Option lookup_option( const std::string option_name ) const;
+    const Option lookup_option( const std::string parameter ) const;
     
     /**
      * @brief Get a copy of the vector with all positional options specified

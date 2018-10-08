@@ -120,6 +120,7 @@ public:
      * @param argv The parameter argv as it can be received from the main function's parameters
      * @returns False, if there are not parameters to parse as the argv parameter of the main function was not passed to the command line interface yet.
      * @throws std::out_of_range If no parameter is specified for an argument or if not all positional arguments of the command line interface are specified
+     * @throws CmdLineArguments::NotFound If an option is not found by the command line parameter parser.
      * @note After parsing the command line parameters into this command line interface the values can be received with the operator>> and the to_variable functions.
      */
     bool parse();
@@ -127,6 +128,7 @@ public:
      * @brief Parse all command line parameters according to the specified options
      * @returns False, if there are not parameters to parse as the argv parameter of the main function was not passed to the command line interface yet.
      * @throws std::out_of_range If no parameter is specified for an argument or if not all positional arguments of the command line interface are specified
+     * @throws CmdLineArguments::NotFound If an option is not found by the command line parameter parser.
      * @note After parsing the command line parameters into this command line interface the values can be received with the operator>> and the to_variable functions.
      */
     bool parse( int argc, char** argv );

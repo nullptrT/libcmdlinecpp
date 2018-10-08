@@ -227,14 +227,28 @@ const Option CmdLineArguments::lookup_positional( const std::string option_name 
 
 
 
-const Option CmdLineArguments::lookup_option( const std::string option_name ) const {
+const Option CmdLineArguments::lookup_option( const std::string parameter ) const {
+    std::string option_str;
+    if ( parameter.compare( 0, 1, "-" ) != 0 ) {
+        throw NotFound("Could not find option '"  + parameter + "'.");
+    } else if ( parameter.compare( 0, 2, "--" ) == 0 ) {
+        option_str = parameter.substr( 2 );
+    } else {
+        option_str = parameter.substr( 1 );
+    }
+    
+    
     for ( unsigned int o = 0; o < m_options.size(); o++ ) {
-        if ( m_options.at(o).option().compare(option_name) == 0 ) {
-            return m_options.at(o);
+        Option option = m_options.at( o );
+        
+        if ( option_str.compare( option.option() ) == 0
+          || option_str.compare( option.option_short() ) == 0
+        ) {
+            return option;
         }
     }
 
-    throw NotFound("Could not find option '"  + option_name + "'.");
+    throw NotFound("Could not find option '"  + parameter + "'.");
 }
 
 
