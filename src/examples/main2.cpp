@@ -72,7 +72,7 @@ int main( int argc, char** argv ) {
     // ACCESS THE VALUES OF THE PARAMETERS WITH DIFFERENT DATA TYPES
     // Required parameters can be safely accessed as they need to be specified
     std::string path;
-    cmdline.to_variable( "path", path );
+    cmdline.to_variable( "PATH", path );
     std::string path2 = cmdline["path"];
     
     int n = 1;
