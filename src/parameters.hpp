@@ -43,6 +43,10 @@ protected:
      * @brief The parameters that where parsed. The first is the option name that can be looked up and the second is the parameter specified for this option
      */
     std::map< std::string, std::string > m_parameters;
+    /**
+     * @brief The last positional parameters as list
+     */
+    std::vector< std::string > m_last_positionals_list;
     
 public:
     /**
@@ -75,6 +79,17 @@ public:
      * @returns A string containing the value of the option key. Returns an empty string, if the option for option_name is not found in this class or no value is set for this key
      */
     const std::string get( const std::string option_name ) const;
+    
+    /**
+     * @brief Set last positional strings from command line parameters
+     * @param last_positionals The strings that are defined for the last postitional argument
+     */
+    void set_last_positionals( std::vector< std::string > last_positionals_list );
+    /**
+     * @brief Get the list of the last positional parameters
+     * @returns A vector containing strings with the last positional parameters
+     */
+    std::vector< std::string > get_last_positionals() const;
     
     /**
      * @brief Test, if an option has an value specified

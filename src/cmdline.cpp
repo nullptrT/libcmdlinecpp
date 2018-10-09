@@ -144,9 +144,22 @@ bool CmdLineInterface::parse() {
             
         } else {
             // Is positional option
-            Option option = m_cmdline_arguments->options_positional().at( options_positional );
             
-            m_cmdline_parameters->set( option.option(), argument );
+            if ( options_positional == m_cmdline_arguments->options_positional().size() - 1
+              && m_argv.size() > a + 1
+            ) {
+                std::vector< std::string > last_positionals;
+                for ( unsigned int p = 0; p < m_argv.size(); p++ ) {
+                    last_positionals.push_back( m_argv.at( p ) );
+                }
+                
+                m_cmdline_parameters->set_last_positionals( last_positionals );
+                break;
+            } else {
+                Option option = m_cmdline_arguments->options_positional().at( options_positional );
+                
+                m_cmdline_parameters->set( option.option(), argument );
+            }
             
             ++options_positional;
             ++a;

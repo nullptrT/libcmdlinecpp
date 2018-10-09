@@ -21,20 +21,20 @@ More features can be requested through issues on [GitHub](https://github.com/nul
 
 * Defining the command line arguments and options.
 * Parsing the command line parameters provided when running the program.
+* A list as last positional argument like `program_name <POSITIONAL1> <POSITIONAL2...>`
 * Getting command line parameters as different data types into variables.
 * Printing the help.
 
 ## Future features
 
 * An action without parameter as first argument like `program_name action [OPTION...]`
-* A list as last positional argument like `program_name <POSITIONAL1> <POSITIONAL2...>`
 
 
 ## License:
 
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-* Copyright (C) 2018 Sebastian Lau <lauseb644@gmail.com>## Usage
+* Copyright (C) 2018 Sebastian Lau <lauseb644@gmail.com>
 
 ## Usage
 

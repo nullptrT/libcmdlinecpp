@@ -33,6 +33,7 @@ namespace cmdlinecpp {
 
 CmdLineParameters::CmdLineParameters()
     :   m_parameters()
+    ,   m_last_positionals_list()
 {}
 
 
@@ -85,6 +86,16 @@ const std::string CmdLineParameters::get( const std::string option_name ) const 
     }
     
     return std::string("");
+}
+
+
+void CmdLineParameters::set_last_positionals( std::vector< std::string > last_positionals_list ) {
+    m_last_positionals_list = last_positionals_list;
+}
+
+
+std::vector< std::string > CmdLineParameters::get_last_positionals() const {
+    return m_last_positionals_list;
 }
 
 
