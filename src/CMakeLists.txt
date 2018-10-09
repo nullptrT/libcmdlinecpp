@@ -3,7 +3,8 @@ include_directories( . )
 
 file( GLOB LIBCMDLINECPP_HEADERS *.hpp )
 
-set( LIBCMDLINECPP_SOURCE arguments.cpp
+set( LIBCMDLINECPP_SOURCE actions.cpp
+                          arguments.cpp
                           cmdline.cpp
                           exceptions.cpp
                           parameters.cpp )

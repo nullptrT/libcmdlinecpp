@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include "actions.hpp"
+
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -201,6 +203,10 @@ public:
 class CmdLineArguments {
 protected:
     /**
+     * @brief All possible actions
+     */
+    std::vector< Action > m_actions;
+    /**
      * @brief All positional arguments
      */
     std::vector< Option > m_positionals;
@@ -230,6 +236,11 @@ public:
      * @param option The option to add
      */
     void add_option( Option option );
+    /**
+     * @brief Add a possible action
+     * @param action The action to add
+     */
+    void add_action( Action action );
     
     /**
      * @brief Look up, if the requested option is regular
@@ -269,6 +280,11 @@ public:
      * @returns A copy of the vector with all regular options specified
      */
     std::vector< Option > options_regular() const;
+    /**
+     * @brief Get the possible actions that are defined for this command line arguments
+     * @returns A list of possible actions
+     */
+    std::vector< Action > actions() const;
     
     /**
      * @brief Exception that is to be thrown, when something in this list is not found

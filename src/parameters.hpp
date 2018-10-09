@@ -47,6 +47,10 @@ protected:
      * @brief The last positional parameters as list
      */
     std::vector< std::string > m_last_positionals_list;
+    /**
+     * @brief The selected action
+     */
+    std::string m_action;
     
 public:
     /**
@@ -72,6 +76,11 @@ public:
      */
     void set( const std::string option_name
             , const std::string parameter );
+    /**
+     * @brief Set the action that is selected
+     * @param action The action, that was selected
+     */
+    void set_action( const std::string action );
     
     /**
      * @brief Get the value for an option
@@ -79,6 +88,11 @@ public:
      * @returns A string containing the value of the option key. Returns an empty string, if the option for option_name is not found in this class or no value is set for this key
      */
     const std::string get( const std::string option_name ) const;
+    /**
+     * @brief Get the specified action, if any
+     * @returns The specified action or an empty string, if no action was specified
+     */
+    const std::string get_action() const;
     
     /**
      * @brief Set last positional strings from command line parameters

@@ -24,6 +24,7 @@
 */
 
 #include <iostream>
+#include <stdexcept>
 #include <sstream>
 
 #include "cmdline.hpp"
@@ -62,6 +63,18 @@ CmdLineInterface& CmdLineInterface::get() {
 
 void CmdLineInterface::define_option( Option option ) {
     *this << option;
+}
+
+
+void CmdLineInterface::define_action( Action action ) {
+    *this << action;
+}
+
+
+CmdLineInterface& CmdLineInterface::operator<<( Action action ) {
+    m_cmdline_arguments->add_action( action );
+    
+    return *this;
 }
 
 
@@ -203,6 +216,14 @@ bool CmdLineInterface::is_specified( const std::string key ) const {
 }
 
 
+bool CmdLineInterface::actions_enabled() const {
+    if ( m_cmdline_arguments->actions().size() > 0 ) {
+        return true;
+    }
+    return false;
+}
+
+
 const Data::Type CmdLineInterface::dataTypeOfOption( const std::string key ) const {
     try {
         Option option = m_cmdline_arguments->lookup_option( key );
@@ -259,7 +280,12 @@ void CmdLineInterface::print_help() const {
     std::cout << m_program_name << " v" << m_program_version << std::endl;
     std::cout << m_program_description << std::endl;
     std::cout << std::endl;
-    std::cout << m_program_name << " [--help,-h] [OPTIONS...]";
+    std::cout << m_program_name << " [--help,-h]";
+    if ( this->actions_enabled() ) {
+        std::cout << " <ACTION>";
+    }
+    std::cout << " [OPTIONS...]";
+    
     for ( unsigned int o = 0
         ; o < m_cmdline_arguments->options_positional().size()
         ; o++
@@ -276,6 +302,37 @@ void CmdLineInterface::print_help() const {
         
         for ( unsigned int u = 0; u < m_usage_examples.size(); u++ ) {
             std::cout << m_usage_examples.at( u ) << std::endl;
+        }
+    }
+    
+    if ( this->actions_enabled() ) {
+        std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << "ACTIONS:" << std::endl;
+        
+        for ( unsigned int a = 0
+            ; a < m_cmdline_arguments->actions().size()
+            ; a++
+        ) {
+            Action action = m_cmdline_arguments->actions().at( a );
+            
+            std::cout << "\t" << action.name();
+            std::cout << "\t\t";
+            
+            const std::string help_text = action.help_text();
+            for ( unsigned int pos = 0; pos < help_text.length()+59; pos += 60 ) {
+                if ( pos > 0 ) {
+                    std::cout << "\t\t\t\t";
+                }
+                if ( pos + 60 > help_text.length() ) {
+                    std::cout << help_text.substr( pos );
+                    break;
+                } else {
+                    std::cout << help_text.substr( pos, pos+60 ) << std::endl;
+                }
+            }
+            
+            std::cout << std::endl;
         }
     }
     
@@ -355,6 +412,15 @@ void CmdLineInterface::print_help_if_requested() const {
         this->print_help();
         std::exit( 0 );
     }
+}
+
+
+const std::string CmdLineInterface::get_selected_action() const {
+    if ( !this->actions_enabled() ) {
+        throw std::out_of_range("Actions are not enabled.");
+    }
+    
+    return m_cmdline_parameters->get_action();
 }
 
 

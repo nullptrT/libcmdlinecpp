@@ -161,6 +161,19 @@ void CmdLineArguments::add_option( Option option ) {
 }
 
 
+void CmdLineArguments::add_action( Action action ) {
+    bool found = false;
+    for ( unsigned int a = 0; a < m_actions.size(); a++ ) {
+        if ( action.name().compare( m_actions.at(a).name() ) == 0 ) {
+            found = true;
+            break;
+        }
+    }
+    
+    m_actions.push_back( action );
+}
+
+
 void CmdLineArguments::add_option_positional( Option option ) {
     m_positionals.push_back( option );
 }
@@ -260,6 +273,11 @@ std::vector< Option > CmdLineArguments::options_positional() const {
 
 std::vector< Option > CmdLineArguments::options_regular() const {
     return m_options;
+}
+
+
+std::vector< Action > CmdLineArguments::actions() const {
+    return m_actions;
 }
 
 

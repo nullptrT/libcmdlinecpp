@@ -89,6 +89,12 @@ public:
 	static CmdLineInterface& get();
 
     /**
+     * @brief Defines a new possible action to the command line interface
+     * @param action The new action
+     * @returns A reference to this object
+     */
+    CmdLineInterface& operator<<( Action action );
+    /**
      * @brief Defines a new option to the command line interface
      * @param option The new option
      * @returns A reference to this object
@@ -113,6 +119,12 @@ public:
      * @param option The new option
      */
     void define_option( Option option );
+    /**
+     * @brief Defines a new possible action to the command line interface
+     * @param action The new action
+     * @returns A reference to this object
+     */
+    void define_action( Action action );
     
     /**
      * @brief Parse all command line parameters according to the specified options
@@ -147,6 +159,11 @@ public:
      * @note You should have added options to this command line interface and have parsed the command line parameters first
      */
     bool is_specified( const std::string key ) const;
+    /**
+     * @brief Test, if actions are enabled
+     * @returns True, if at least one action is needed
+     */
+    bool actions_enabled() const;
     /**
      * @brief Get the data type used by an option that is specified for this command line interface
      * @param key The name of the argument to look for
@@ -199,6 +216,12 @@ public:
      */
     void print_help_if_requested() const;
     
+    /**
+     * @brief Get the selected action, if enabled
+     * @returns The selected action or an empty string, if disabled
+     * @throw std::out_of_range If nothing was parsed yet
+     */
+    const std::string get_selected_action() const;
     /**
      * @brief Specify the requested data's key and occurence to get as next output of the operator>> functions
      * @param data_requested A Data that specifies at least a key and optionally a appearence number, if the parameter is to be passed multiple times to the program
