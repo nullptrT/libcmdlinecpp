@@ -4,7 +4,7 @@
  * @author Sebastian Lau <lauseb644 [at] gmail [dot] com>
  **/
 /*
-    LibCmdLineC++: A simple parser for command line arguments with C++
+    LibCmdLineC++: A simple parser for parsing command line arguments with C++
     Copyright (C) 2018 Sebastian Lau <lauseb644@gmail.com>
 
     This library is free software; you can redistribute it and/or
@@ -155,6 +155,11 @@ bool CmdLineInterface::parse() {
                 ++a;
             }
             
+        } else if ( m_cmdline_arguments->are_actions_enabled()
+                 && m_cmdline_arguments->is_action( argument )
+        ) {
+            m_cmdline_parameters->set_action( argument );
+            ++a;
         } else {
             // Is positional option
             

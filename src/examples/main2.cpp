@@ -1,5 +1,5 @@
 /*
-    LibCmdLineC++: A simple parser for command line arguments with C++
+    LibCmdLineC++: A simple parser for parsing command line arguments with C++
     Copyright (C) 2018 Sebastian Lau <lauseb644@gmail.com>
 
     This library is free software; you can redistribute it and/or

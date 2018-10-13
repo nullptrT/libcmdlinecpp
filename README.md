@@ -1,5 +1,5 @@
 # LibCmdLineC++
-##### A simple parser for command line arguments with C++
+##### A simple parser for parsing command line arguments with C++
 ###### v0.1.0
 
 This library is a simple and intuitive frontend to libstdc++ adding a simple command line parser so that you don't need to write it yourself. It has a simple streaming API and some old-fashioned functions.
@@ -22,12 +22,10 @@ More features can be requested through issues on [GitHub](https://github.com/nul
 * Defining the command line arguments and options.
 * Parsing the command line parameters provided when running the program.
 * A list as last positional argument like `program_name <POSITIONAL1> <POSITIONAL2...>`
+* An action without parameter as first argument like `program_name action [OPTION...]`
 * Getting command line parameters as different data types into variables.
 * Printing the help.
 
-## Future features
-
-* An action without parameter as first argument like `program_name action [OPTION...]`
 
 
 ## License:

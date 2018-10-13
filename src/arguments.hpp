@@ -4,7 +4,7 @@
  * @author Sebastian Lau <lauseb644 [at] gmail [dot] com>
  **/
 /*
-    LibCmdLineC++: A simple parser for command line arguments with C++
+    LibCmdLineC++: A simple parser for parsing command line arguments with C++
     Copyright (C) 2018 Sebastian Lau <lauseb644@gmail.com>
 
     This library is free software; you can redistribute it and/or
@@ -254,6 +254,17 @@ public:
      * @returns True, if the option does not begin with one '-' and parameter is specified in one Option that is already specified in this CmdLineArguments
      */
     bool is_option_positional( const std::string parameter ) const;
+    /**
+     * @brief Test, if actions are enabled
+     * @returns True, if actions are enabled
+     */
+    bool are_actions_enabled() const;
+    /**
+     * @brief Look up, if the requested option is an action
+     * @param parameter Name of the action or some string that is not known
+     * @returns True, if the parameter is known as an action.
+     */
+    bool is_action( const std::string parameter ) const;
     
     /**
      * @brief Find a positional option by its name

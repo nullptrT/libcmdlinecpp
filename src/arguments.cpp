@@ -4,7 +4,7 @@
  * @author Sebastian Lau <lauseb644 [at] gmail [dot] com>
  **/
 /*
-    LibCmdLineArgumentsC++: A simple parser for command line arguments with C++
+    LibCmdLineArgumentsC++: A simple parser for parsing command line arguments with C++
     Copyright (C) 2018 Sebastian Lau <lauseb644@gmail.com>
 
     This library is free software; you can redistribute it and/or
@@ -221,6 +221,24 @@ bool CmdLineArguments::is_option_positional( const std::string parameter ) const
         
         if ( option_str.compare( option.option() ) == 0 ) {
            return true; 
+        }
+    }
+    
+    return false;
+}
+
+
+bool CmdLineArguments::are_actions_enabled() const {
+    return m_actions.size() > 0;
+}
+
+
+bool CmdLineArguments::is_action( const std::string parameter ) const {
+    for ( unsigned int a = 0; a < m_actions.size(); a++ ) {
+        Action action = m_actions.at( a );
+        
+        if ( action.name().compare( parameter ) == 0 ) {
+            return true;
         }
     }
     
