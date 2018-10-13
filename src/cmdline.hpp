@@ -165,6 +165,12 @@ public:
      */
     bool actions_enabled() const;
     /**
+     * @brief Get the last positional parameters as list
+     * @returns A vector containing the last positional elements
+     */
+    std::vector< std::string > get_last_positionals_as_list() const;
+    
+    /**
      * @brief Get the data type used by an option that is specified for this command line interface
      * @param key The name of the argument to look for
      * @returns The Data::Type used by the option looked up or Data::Type::Void, if the option was not found in this command line interface

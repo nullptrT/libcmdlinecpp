@@ -8,4 +8,7 @@ if( BUILD_CMDLINECPP_TESTS )
 	
     add_executable( cmdlinecpp_test_action main_action.cpp )
 	target_link_libraries( cmdlinecpp_test_action cmdlinecpp )
+	
+    add_executable( cmdlinecpp_test_last_positional_list main_last_positional.cpp )
+	target_link_libraries( cmdlinecpp_test_last_positional_list cmdlinecpp )
 endif()
