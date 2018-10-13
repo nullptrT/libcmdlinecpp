@@ -1,5 +1,5 @@
 # LibCmdLineC++
-##### A simple parser for command line arguments with C++
+##### A simple parser for parsing command line arguments with C++
 ##### Changelog
 
 
