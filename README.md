@@ -1,6 +1,6 @@
 # LibCmdLineC++
 ##### A simple parser for parsing command line arguments with C++
-###### v0.1.0
+###### v1.0.0
 
 This library is a simple and intuitive frontend to libstdc++ adding a simple command line parser so that you don't need to write it yourself. It has a simple streaming API and some old-fashioned functions.
 
@@ -11,6 +11,8 @@ For examples, look below on this page.
 * [Online api documentation](https://doc.0ptr.de/libcmdlinecpp/annotated.html)
 * Packages can be found for ArchLinux in [Arch User Repository](https://aur.archlinux.org/libcmdlinecpp)
 * How to use it is documented lower on this page.
+
+Since v1.0.0 LibCmdLineC++ is feature complete.
 
 If you wrote additional datastructures or functions and you think it could be useful within this library: You are welcome to create a pull request or contact me ( lauseb644 _at_ gmail _dot_ com ).
 
@@ -129,7 +131,25 @@ The same functionality can be provided by not using the streaming API of libcmdl
     cmdline.to_variable( "path", path );
 ```
 
+As another functionality there are actions. Actions are the first parameter that is provided and can be used like in `main_action.cpp`.
 
+```c++
+// Add a few actions
+cmdline << cmdlinecpp::Action( "read", "Read the file." );
+cmdline << cmdlinecpp::Action( "write", "Write to the file." );
+
+// SPECIFY MORE PARAMETERS, PARSE THEM AND DO SOMETHING
+
+std::string action = cmdline.get_selected_action();
+```
+
+As last functionality you can provide more positional arguments than specified, e.g. two files instead of one positional argument that will be parsed into a list like in `main_last_positional.cpp`.
+
+```c++
+// SPECIFY AND PARSE PARAMETERS
+
+std::vector< std::string > param_list = cmdline.get_last_positionals_as_list();
+```
 
 
 #### Version checking

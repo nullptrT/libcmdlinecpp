@@ -3,6 +3,14 @@
 ##### Changelog
 
 
+## Important changes in release 1.0.0 (2018-10-13) [stable]
+
+#### New features
+
+* A list as last positional argument like `program_name <POSITIONAL1> <POSITIONAL2...>`
+* An action without parameter as first argument like `program_name action [OPTION...]`
+
+
 ## Important changes in release 0.1.0 (2018-10-07) [first release]
 
 Initial release with the following features:

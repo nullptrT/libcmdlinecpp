@@ -1,8 +1,8 @@
 # Maintainer: Sebastian Lau <lauseb644 _at_ gmail _dot_ com>
 pkgname="libcmdlinecpp-git"
-pkgver=0.1.0.20181008.1
+pkgver=1.0.0.20181013.1
 pkgrel=1
-pkgdesc="A simple parser for command line arguments with C++"
+pkgdesc="A simple parser for parsing command line arguments with C++"
 arch=('x86_64' 'armv6h' 'armv7h')
 url="https://github.com/nullptrT/libcmdlinecpp"
 license=('LGPL3')
@@ -19,7 +19,7 @@ prepare() {
 	mkdir libcmdlinecpp
 	mkdir build
 	mkdir build-static
-	cp -r ../../../{Doxyfile.in,CMakeLists.txt,lib,src,.git} libcmdlinecpp
+	cp -r ../../../{Doxyfile.in,CMakeLists.txt,lib,src} libcmdlinecpp
 }
 
 build() {
